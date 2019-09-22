@@ -1,0 +1,18 @@
+{% extends 'base.html.twig' %}
+{% form_theme formArticle 'bootstrap_4_layout.html.twig' %}
+
+{% block body %}
+
+    <h1>Create your article</h1>
+
+    {{ form_start(formArticle) }}
+
+    {{ form_row(formArticle.title, { 'attr' : {'placeholder' : "Article title"}}) }}
+    {{ form_row(formArticle.content, { 'attr' : {'placeholder' : "Article content"}}) }}
+    {{ form_row(formArticle.image, { 'attr' : {'placeholder' : "Image URL"}}) }}
+
+    <button type="submit" class="btn btn-success">Add article</button>
+
+    {{ form_end(formArticle) }}
+
+{% endblock %}
