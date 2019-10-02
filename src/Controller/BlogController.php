@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Article;
+use App\Form\ArticleType;
 use App\Repository\ArticleRepository;
 /*use Doctrine\DBAL\Types\TextType;*/
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -39,32 +40,43 @@ class BlogController extends AbstractController
 
     /**
      * @Route("/blog/new", name="create")
+     * @Route("/blog/{id}/edit", name="edit")
      */
-    public function create(Request $request, ObjectManager $manager)
+    public function form(Article $article = null, Request $request, ObjectManager $manager)
     {
-        $article = new Article();
+        if (!$article) {
+            $article = new Article();
+        }
 
-        /* créer un form bindé à l'article */
-        $form = $this->createFormBuilder($article)
-            ->add('title')
-            ->add('content')
-            ->add('image')
-            ->getForm();
+        /* créer un form bindé à l'article, sans make:form */
+        // $form = $this->createFormBuilder($article)
+        //     ->add('title')
+        //     ->add('content')
+        //     ->add('image')
+        //     ->getForm();
 
-            // analyser si le formulaire est soumis et valide
-            $form->handleRequest($request);
+        /* créer un form bindé à l'article, avec make:form (il est dans le dossier form) */
+        $form = $this->createForm(ArticleType::class, $article);
 
-            if ($form->isSubmitted() && $form->isValid()){
+        // analyser si le formulaire est soumis et valide
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            // si l'article n'existe pas déjà
+            if (!$article->getId()) {
                 $article->setCreatedAt(new \DateTime());
-                $manager->persist($article);
-                $manager->flush();
-
-                return $this->redirectToRoute('blog_show', ['id' => $article->getId()]);
             }
+
+            $manager->persist($article);
+            $manager->flush();
+
+            return $this->redirectToRoute('blog_show', ['id' => $article->getId()]);
+        }
 
         /* passer le form à twig */
         return $this->render('blog/create.html.twig', [
-            'formArticle' => $form->createView()
+            'formArticle' => $form->createView(),
+            'editMode' => $article->getId() !== null
         ]);
     }
 

@@ -3,15 +3,28 @@
 
 {% block body %}
 
-    <h1>Create your article</h1>
+    <h1>
+        {% if editMode %}
+            Edit your article
+        {% else %}
+            Create your article
+        {% endif %}
+    </h1>
 
     {{ form_start(formArticle) }}
 
     {{ form_row(formArticle.title, { 'attr' : {'placeholder' : "Article title"}}) }}
+    {{ form_row(formArticle.category) }}
     {{ form_row(formArticle.content, { 'attr' : {'placeholder' : "Article content"}}) }}
     {{ form_row(formArticle.image, { 'attr' : {'placeholder' : "Image URL"}}) }}
 
-    <button type="submit" class="btn btn-success">Add article</button>
+    <button type="submit" class="btn btn-success">
+        {% if editMode %}
+            Edit article
+        {% else %}
+            Add article
+        {% endif %}
+    </button>
 
     {{ form_end(formArticle) }}
 
