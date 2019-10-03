@@ -12,7 +12,10 @@
             {{ article.content | raw }}
         </div>
 
+        <!-- boucle qui affiche les commentaires de l'article -->
         <section id="commentaires">
+            <h1>{{ article.comments | length }}
+                comments</h1>
             {% for comment in article.comments %}
                 <div class="commment">
                     <div class="row">
@@ -26,6 +29,18 @@
                     </div>
                 </div>
             {% endfor %}
+
+            <!-- formulaire pour les commentaires -->
+            {% if app.user %}
+                {{ form_start(commentForm) }}
+                {{ form_row(commentForm.author, { 'attr': {'placeholder': 'Name'} }) }}
+                {{ form_row(commentForm.content, { 'attr': {'placeholder': 'Comment'} }) }}
+                <button type="submit" class="btn btn-success">Post comment</button>
+                {{ form_end(commentForm) }}
+            {% else %}
+                <h2>You must be logged in to post comments.</h2>
+                <a href="{{ path('security_login') }}" class="btn btn-primary">Log in</a>
+            {% endif %}
         </section>
     </article>
 {% endblock %}
