@@ -6,17 +6,72 @@ use App\Entity\Article;
 use App\Entity\Comment;
 use App\Form\ArticleType;
 use App\Form\CommentType;
-use App\Repository\ArticleRepository;
+use App\Entity\ArticleLike;
+use Doctrine\ORM\EntityManager;
 /*use Doctrine\DBAL\Types\TextType;*/
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\Routing\Annotation\Route;
+use App\Repository\ArticleRepository;
+use App\Repository\ArticleLikeRepository;
+use Symfony\Component\HttpFoundation\Request;
 use Doctrine\Common\Persistence\ObjectManager;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
-use Symfony\Component\HttpFoundation\Request;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 class BlogController extends AbstractController
 {
+    /**
+     * Permet de liker et unliker un article
+     * 3 cas à gérer : utilisateur non connecté ; utilisateur connecté qui like, ou qui unlike
+     *
+     * @Route("/blog/{id}/like", name="article_like")
+     * 
+     * @param Article $article
+     * @param ObjectManager $manager
+     * @param ArticleLikeRepository $likeRepo
+     * @return Response
+     */
+    public function like(Article $article, ObjectManager $manager, ArticleLikeRepository $likeRepo): Response
+    {
+        $user = $this->getUser();
+
+        /* si utilisateur non connecté */
+        if (!$user) return $this->json(['code' => 403, 'message' => "unauthorized"], 403);
+
+        /* si l'article est déjà liké, on unlike (supprime le like) */
+        if ($article->isLikedByUser($user)) {
+            $like = $likeRepo->findOneBy([
+                'article' => $article,
+                'user' => $user
+            ]);
+
+            $manager->remove($like);
+            $manager->flush();
+
+            return $this->json([
+                'code' => 200,
+                'message' => "Like removed",
+                'likes' => $likeRepo->count(['article' => $article])
+            ], 200);
+        }
+
+        /* si on n'est pas passé dans le return plus haut, c'est que l'article n'est pas liké : on crée le like */
+
+        $like = new ArticleLike();
+        $like->setArticle($article)
+            ->setUser($user);
+
+        $manager->persist($like);
+        $manager->flush();
+
+        return $this->json([
+            'code' => 200,
+            'message' => 'Like added',
+            'likes' => $likeRepo->count(['article' => $article])
+        ], 200);
+    }
+
     /**
      * @Route("/blog", name="blog")
      * route qui affiche tous les articles
@@ -97,8 +152,7 @@ class BlogController extends AbstractController
 
         $form->handleRequest($request);
 
-        if($form->isSubmitted() && $form->isValid())
-        {
+        if ($form->isSubmitted() && $form->isValid()) {
             $comment->setCreatedAt(new \DateTime())
                 ->setArticle($article);
 

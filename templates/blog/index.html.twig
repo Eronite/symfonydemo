@@ -14,8 +14,65 @@
                     <img alt="" src={{ article.image }}>
                     {{ article.content | raw }}
                     <a href="{{ path ('blog_show', {'id' : article.id}) }}" class="btn btn-primary">Read more</a>
+                    <a href="{{ path ('article_like', {'id' : article.id}) }}" class="btn btn-link js-like">
+                        {% if app.user and article.isLikedByUser(app.user) %}
+                            <i class="fas fa-thumbs-up"></i>
+                        {% else %}
+                            <i class="far fa-thumbs-up"></i>
+                        {% endif %}
+                        <span class="js-likes">{{ article.likes | length }}</span>
+                        <span class="js-label">Like</span>
+                    </a>
                 </div>
             </article>
         {% endfor %}
     </section>
+{% endblock %}
+
+{% block javascripts %}
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    {# todo : mettre ce script dans un fichier séparé #}
+    <script>
+        function onClickBtnLike(event) { /* annule le comportement par défaut d'un clic (recharger la page vers un lien) */
+            event.preventDefault();
+
+            /* récupère l'url du lien pour l'appeler nous-même via ajax */
+            const url = this.href;
+            // la valeur de this dans une fonction qui est liée à un événement est l'événement html qui déclenche cet événement (ici, un "a")
+
+            const spanCount = this.querySelector('span.js-likes');
+            // donc ici on a sélectionné le span de classe js-likes qui est contenu dans le "a"
+
+            const icon = this.querySelector('i');
+
+            /* todo : modifier pour appeler la méthode avec un post (pas de get) et utiliser les requirements de symfony pour préciser qu'on ne peut appeler cette méthode qu'en post */
+            /* axios.get renvoie une promesse : on met donc un then pour signifier "quand tu auras la réponse, met là dans la fonction" */
+            axios.get(url).then(function (response) {
+                // const likes = response.data.likes;
+                // spanCount.textContent = likes;
+                // en plus court :
+                spanCount.textContent = response.data.likes;
+
+                /* on checke la classe de l'icône et en fonction, on change l'icône */
+                if (icon.classList.contains('fas')) 
+                    icon.classList.replace('fas', 'far');
+                 else 
+                    icon.classList.replace('far', 'fas');
+                
+
+                // on gère l'erreur avec le catch de la promesse
+            }).catch(function (error) {
+                if (error.response.status === 403) { // 403 : cas où on est déconnecté (donc pas autorisé à aimer)
+                    window.alert('You have to be logged in to like an article');
+                } else {
+                    window.alert('An error occured');
+                }
+            });
+        }
+
+        /* selectionne tous les a de classe js-like et boucle sur chaque */
+        document.querySelectorAll('a.js-like').forEach(function (link) { /* au clic, on appelle onClickBtnLike */
+            link.addEventListener('click', onClickBtnLike);
+        })
+    </script>
 {% endblock %}

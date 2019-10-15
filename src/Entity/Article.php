@@ -2,9 +2,10 @@
 
 namespace App\Entity;
 
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
+use App\Entity\User;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
@@ -52,9 +53,15 @@ class Article
      */
     private $comments;
 
+    /**
+     * @ORM\OneToMany(targetEntity="App\Entity\ArticleLike", mappedBy="article")
+     */
+    private $likes;
+
     public function __construct()
     {
         $this->comments = new ArrayCollection();
+        $this->likes = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -151,5 +158,51 @@ class Article
         }
 
         return $this;
+    }
+
+    /**
+     * @return Collection|ArticleLike[]
+     */
+    public function getLikes(): Collection
+    {
+        return $this->likes;
+    }
+
+    public function addLike(ArticleLike $like): self
+    {
+        if (!$this->likes->contains($like)) {
+            $this->likes[] = $like;
+            $like->setArticle($this);
+        }
+
+        return $this;
+    }
+
+    public function removeLike(ArticleLike $like): self
+    {
+        if ($this->likes->contains($like)) {
+            $this->likes->removeElement($like);
+            // set the owning side to null (unless already changed)
+            if ($like->getArticle() === $this) {
+                $like->setArticle(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * parmi tous les likes sur cet article, trouve s'il y en a un qui appartient à l'$user
+     *
+     * @param User $user
+     * @return boolean
+     */
+    public function isLikedByUser(User $user) : bool
+    {
+        foreach($this->likes as $like)
+        {
+            if($like->getUser() === $user) return true;
+        }
+        return false;
     }
 }
