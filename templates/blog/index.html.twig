@@ -33,8 +33,8 @@
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
     {# todo : mettre ce script dans un fichier séparé #}
     <script>
-        function onClickBtnLike(event) { /* annule le comportement par défaut d'un clic (recharger la page vers un lien) */
-            event.preventDefault();
+        function onClickBtnLike(event) { 
+            event.preventDefault(); /* annule le comportement par défaut d'un clic (recharger la page vers un lien) */
 
             /* récupère l'url du lien pour l'appeler nous-même via ajax */
             const url = this.href;
@@ -51,7 +51,8 @@
                 // const likes = response.data.likes;
                 // spanCount.textContent = likes;
                 // en plus court :
-                spanCount.textContent = response.data.likes;
+                //spanCount.textContent = response.data.likes;
+                console.log(response);
 
                 /* on checke la classe de l'icône et en fonction, on change l'icône */
                 if (icon.classList.contains('fas')) 
