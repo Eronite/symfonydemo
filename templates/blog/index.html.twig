@@ -10,8 +10,8 @@
             <article>
                 <h2>{{ article.title }}</h2>
                 <div class="metadata">{{ article.createdAt | date('d/m/Y') }}</div>
-                <div class="content">
-                    <img alt="" src={{ article.image }}>
+                <div class="content text-justify">
+                    <img class="img-fluid" alt="" src={{ article.image }}>
                     {{ article.content | raw }}
                     <a href="{{ path ('blog_show', {'id' : article.id}) }}" class="btn btn-primary">Read more</a>
                     <a href="{{ path ('article_like', {'id' : article.id}) }}" class="btn btn-link js-like">
@@ -48,11 +48,12 @@
             /* todo : modifier pour appeler la méthode avec un post (pas de get) et utiliser les requirements de symfony pour préciser qu'on ne peut appeler cette méthode qu'en post */
             /* axios.get renvoie une promesse : on met donc un then pour signifier "quand tu auras la réponse, met là dans la fonction" */
             axios.get(url).then(function (response) {
+                // voir ce que contient le json renvoyé par la fonction like de BlogController (attribut data qui nous intéresse après) : 
+                // console.log(response);
                 // const likes = response.data.likes;
                 // spanCount.textContent = likes;
                 // en plus court :
-                //spanCount.textContent = response.data.likes;
-                console.log(response);
+                spanCount.textContent = response.data.likes;
 
                 /* on checke la classe de l'icône et en fonction, on change l'icône */
                 if (icon.classList.contains('fas')) 

@@ -7,8 +7,8 @@
             {{ article.createdAt | date('d/m/Y') }}
             dans la catégorie
             {{article.category.title}}</div>
-        <div class="content">
-            <img src="{{ article.image }}" alt="">
+        <div class="content text-justify">
+            <img class="img-fluid" src="{{ article.image }}" alt="">
             {{ article.content | raw }}
         </div>
 
@@ -17,13 +17,13 @@
             <h1>{{ article.comments | length }}
                 comments</h1>
             {% for comment in article.comments %}
-                <div class="commment">
+                <div class="comment">
                     <div class="row">
                         <div class="col-3">
                             {{comment.author}}
                             (<small>{{ comment.createdAt | date('d/m/Y à H:i') }}</small>)
                         </div>
-                        <div class="col">
+                        <div class="col text-justify">
                             {{ comment.content | raw }}
                         </div>
                     </div>
